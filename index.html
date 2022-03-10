@@ -1,0 +1,342 @@
+<html>
+<head>
+
+    <title> Lottery</title>
+	<style type="text/css">
+	.auto-style1 {
+        background-color: #003344;
+        color: white;
+        font-weight: bold;
+        font-size: x-large;
+        text-align: center;
+        padding: 20px;
+		font-family: Comic Sans MS;
+    }
+	.labeltext{
+         color:#00ADAD;
+         font-size: x-large;
+         font-weight: bold;
+         font-family: "Microsoft YaHei";
+     }
+	 .labelsstext{
+         color:	#3A006F;
+         font-size: large;
+         font-weight: bold;
+         font-family: "Microsoft YaHei";
+     }
+    .button {
+		background-color: #6F00D2; /* Green */
+		border: none;
+		color: white;
+		padding: 15px 32px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 16px;
+		margin: 4px 2px;
+		cursor: pointer;
+		-webkit-transition-duration: 0.4s; /* Safari */
+		transition-duration: 0.4s;
+		border-radius: 10px 10px 10px 10px;
+    }
+    .button2:hover {
+		box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+    }
+	.inputs {
+		padding:5px 15px; background:#ccc; border:0 none;
+		cursor:pointer;
+		-webkit-border-radius: 5px;
+		border-radius: 5px; }
+    </style>
+
+</head>
+<body style="margin:0px;background-color:#DEFFFF">
+    <h1 class="auto-style1">Lottery</h1>
+	<p class="labeltext">我的地址：<span id="my_address" Class="labelsstext"></span></p>
+	<p class="labeltext">我的餘額：<span id="my_balance" Class="labelsstext"></span></p>
+	<p class="labeltext">主辦單位：<span id="sponser_ad" Class="labelsstext"></span></p>
+	<p class="labeltext">抽獎模式：<span id="lottery_Mode" Class="labelsstext"></span></p>
+
+	<hr/>
+	<form name="form" id="form" class="labeltext">
+		尋求機會：
+		<input type="text" name="give_howmuch" value="0" size="50" Class="inputs">
+	</form>
+	<button id="answer_chance"  onclick="answer_Chance()" Class="button button2" >發送</button>
+	<hr style="height:3px;border:none;border-top:3px double #000000;" />
+	<p class="labeltext">目前參加人數：<span id="total_applicants" Class="labelsstext"></span></p>
+    <button id="create_Lottery" onclick="create_Lottery()" Class="button button2" >加入抽獎</button>
+    <br/>
+
+	<hr style="height:3px;border:none;border-top:3px double #000000;" />
+	<p class="labeltext">得獎者：<span id="winner_ad" Class="labelsstext"></span></p>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+		if (typeof web3 !== 'undefined') {
+		  web3 = new Web3(web3.currentProvider);
+		} else {
+		  // Set the provider you want from Web3.providers
+		  web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8887"));
+		}
+
+		const inputElement=document.getElementsByTagName("input");
+		var winnerad;
+		var myContract;
+		var coinbase;
+		
+		async function printPostsToConsole() {
+
+			//取得帳號
+			coinbase = await web3.eth.getCoinbase();
+
+			//取得帳號餘額
+			var balance = await web3.eth.getBalance(coinbase);
+			 $("#my_address").text(coinbase);
+			 $("#my_balance").text(balance);  //wei 轉換成 ether web3.utils.fromWei()
+			
+			 var contract_address = "0x2D6Af967cF6Be16eAA77B04E6D392A21C7d5712B";
+			 var contract_abi = [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "hold",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "numApplicants",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "switchmode",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "winnerInd",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "isrepeatable",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "whodonate",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "applicants",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "temp",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "feedback_chance",
+      "outputs": [],
+      "payable": true,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "who",
+          "type": "address"
+        },
+        {
+          "name": "multi",
+          "type": "uint256"
+        }
+      ],
+      "name": "change_num",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "multi_num",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "timestamp",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "enter",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "winnerAddress",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "donate",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "payable": false,
+      "type": "constructor"
+    }
+  ];	
+			 myContract = await new web3.eth.Contract(contract_abi, contract_address);
+
+			//取得合約餘額
+			var balance_contract = await web3.eth.getBalance(contract_address);
+			myContract.methods.numApplicants().call().then(function(data){
+				$("#total_applicants").text(data);
+	
+			});
+			myContract.methods.owner().call().then(function(data){
+				$("#sponser_ad").text(data);
+			});
+			myContract.methods.isrepeatable().call().then(function(data){
+				if(data==false)
+					$("#lottery_Mode").text("不可重複");
+				else
+					$("#lottery_Mode").text("可重複");
+			})
+			myContract.methods.winnerAddress().call().then(function (data) {
+				$("#winner_ad").text(data);
+			});
+			
+		};
+		printPostsToConsole();
+		function create_Lottery(){
+			myContract.methods.enter().send({from: coinbase}).then(function(receipt){
+				alert("參加抽獎成功");
+				location.reload();
+			});
+		}
+		
+		function answer_Chance() {
+			myContract.methods.feedback_chance().send({from:coinbase,value: inputElement[0].value}).then(function(data) {
+				alert("已發出求救訊號");	
+			});
+		}
+    </script>
+</body>
+
+</html>
