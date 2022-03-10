@@ -1,0 +1,10 @@
+1.	Solidity 檔案名稱：Lottery.sol
+2.	Vyper 檔案名稱：Lottery.vy
+3.	使用Truffle suit：如影片內容所述。
+4.	改進功能：
+	甲、	可切換模式(可重複抽獎、不可重複抽獎)。
+	乙、	可捐錢給主辦者。
+	丙、	主辦者可增加指定參賽者的中獎機率(做籤)。
+	丁、	使用web做介面。
+5.	Web檔案名稱：Sponser.html、Index.html
+6.	Demo影片位置：https://www.youtube.com/watch?v=iSxfBDFnXXE
